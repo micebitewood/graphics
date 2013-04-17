@@ -60,7 +60,7 @@ public class MyMISApplet extends MISApplet {
 			for(int i = 0; i < 3; i++)
 				light[0][i] /= sum;
 		}
-			
+		material = new Material();
 	}
 
 	//run at the beginning of every frame
@@ -322,7 +322,6 @@ public class MyMISApplet extends MISApplet {
 		double g = .35;
 		double b = .20;
 
-		material = new Material();
 		material.setAmbient(.2, 0, 0);
 		material.setDiffuse(.8, 0, 0);
 		material.setSpecular(1, 1, 1, 20);
