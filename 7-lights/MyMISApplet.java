@@ -41,7 +41,7 @@ public class MyMISApplet extends MISApplet {
 
 	Material material;
 
-	double[][][] lights = {{{1, 1, 1}, {1, 1, 1}}, {{-1, -1, -1}, {.1, .1, 1}}};
+	double[][][] lights = {{{1, 1, 1}, {1, 1, 1}}, {{-1, -1, -1}, {1, 1, 1}}};
 	
 	//run at the beginning before anything happens
 	public void initialize()
@@ -49,6 +49,7 @@ public class MyMISApplet extends MISApplet {
 		for(int i = 0; i < 4; i++)
 			point[i] = new Point();
 		zBuffer = new double[H][W];
+		material = new Material();
 		
 		//normalize of Ldir
 		for(double[][] light: lights)
@@ -70,14 +71,13 @@ public class MyMISApplet extends MISApplet {
 		t = 3 * time;
 
 		//refresh the frame
-		for(int x = 0; x < H; x++)
-			for(int y = 0; y < W; y++)
+		for(int y = 0; y < H; y++)
+			for(int x = 0; x < W; x++)
+			{
 				pix[y * W + x] = pack((int)(255 * .2), (int)(255 * .5), (int)(255 * .9));
+				zBuffer[y][x] = -FOV;
+			}
 
-		//initialization of zBuffer
-		for(int i = 0; i < H; i++)
-			for(int j = 0; j < W; j++)
-				zBuffer[i][j] = -FOV;
     }
 
     public void setPixel(int x, int y, int rgb[]) {
@@ -296,7 +296,7 @@ public class MyMISApplet extends MISApplet {
 
 				double zBufferBuffer = LzBuffer + T * (RzBuffer - LzBuffer);
 
-				if(zBufferBuffer > zBuffer[x][y])
+				if(zBufferBuffer > zBuffer[y][x])
 				{
 					int[] RGB = {0, 0, 0};
 					for(int i = 0; i < 3; i++)
@@ -304,7 +304,7 @@ public class MyMISApplet extends MISApplet {
 						//RGB[i] = (int)(255 * (LRGB[i] + T * (RRGB[i] - LRGB[i])));
 
 					pix[y * W + x] = pack(RGB[0], RGB[1], RGB[2]);
-					zBuffer[x][y] = zBufferBuffer;
+					zBuffer[y][x] = zBufferBuffer;
 				}
 			}
 		}
@@ -322,7 +322,6 @@ public class MyMISApplet extends MISApplet {
 		double g = .35;
 		double b = .20;
 
-		material = new Material();
 		material.setAmbient(.2, 0, 0);
 		material.setDiffuse(.8, 0, 0);
 		material.setSpecular(1, 1, 1, 20);
@@ -336,16 +335,6 @@ public class MyMISApplet extends MISApplet {
 
 		//draw the sphere
 		drawFace(sphere);
-
-		cube.cube();
-		cube.getMatrix().identity().translate(0, 8, -10).rotateX(time).rotateY(time);
-		cube.setMaterial(material);
-
-		vertices = cube.getVertices();
-		faces = cube.getFaces();
-
-		//draw the cube
-		drawFace(cube);
 
 		material.setAmbient(.1*r, .1*g, .1*b);
 		material.setDiffuse(.05*r, .05*g, .05*b);

@@ -28,7 +28,7 @@ import java.util.*;
 
 public class Geometry
 {
-	private int mesh = 60;//the number of mesh
+	private int mesh = 100;//the number of mesh
 	private double vertices[][];
 	private int faces[][];
 	private Matrix globalMatrix;//save the parent matrix

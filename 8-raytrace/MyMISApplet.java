@@ -28,9 +28,14 @@ public class MyMISApplet extends MISApplet
 	int x;
 	int y;
 
+	double[] pix_z;
+	int[] pix2;
+
 	public void initialize()
 	{
 		material = new Material();
+		pix_z = new double[W * H];
+		pix2 = new int[W * H];
 		for(double[][] light: lights)
 			normalize(light[0]);
 	}
@@ -41,7 +46,11 @@ public class MyMISApplet extends MISApplet
 
 		for(int y = 0; y < H; y++)
 			for(int x = 0; x < W; x++)
-				pix[x * W + y] = pack(255, 255, 255);
+			{
+				pix2[y * W + x] = pix[y * W + x];
+				pix[y * W + x] = pack(255, 255, 255);
+			}
+				
 		material.setAmbient(.2, 0, 0);
 		material.setDiffuse(.8, 0, 0);
 		material.setSpecular(1, 1, 1, 20);
@@ -98,6 +107,8 @@ public class MyMISApplet extends MISApplet
 			double C = dot(v_c, v_c) - sphere[0][3] * sphere[0][3];
 			if(solveQuadraticEquation(A, B, C, root))
 			{
+				if(root[0] < 0)
+					continue;
 				solved = true;
 				if(root[0] < T[0])
 				{
@@ -125,6 +136,9 @@ public class MyMISApplet extends MISApplet
 
 		for(double[][] light: lights)
 		{
+			set(w, light[0][0], light[0][1], light[0][1]);
+			if(raytrace(v, w, T))
+				continue;
 			double ldirN = 0;
 			for(int k = 0; k < 3; k++)
 				ldirN += light[0][k] * N[k];
@@ -171,7 +185,9 @@ public class MyMISApplet extends MISApplet
 						P[k] = v[k] + T[0] * w[k];
 						N[k] = P[k] - T_s[k];
 					}
+					pix_z[y * W + x] = T[0];
 					normalize(N);
+					set(v, P[0], P[1], P[2]);
 					computeShading(N, rgb);
 					pix[y * W + x] = pack((int)rgb[0], (int)rgb[1], (int)rgb[2]);
 				}
