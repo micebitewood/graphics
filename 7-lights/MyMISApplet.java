@@ -61,7 +61,7 @@ public class MyMISApplet extends MISApplet {
 			for(int i = 0; i < 3; i++)
 				light[0][i] /= sum;
 		}
-			
+		material = new Material();
 	}
 
 	//run at the beginning of every frame
