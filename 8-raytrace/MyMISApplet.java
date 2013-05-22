@@ -1,3 +1,8 @@
+/*
+	Assignment 8
+
+	Raytracing and shading
+*/
 public class MyMISApplet extends MISApplet
 {
 	double t = 0;
@@ -8,14 +13,25 @@ public class MyMISApplet extends MISApplet
 		{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}
 	};
 
+//for raytracing
+
+	//current position
 	double[] v = new double[3];
+	//normalized vector from v towards light source
 	double[] w = new double[3];
+	//vector from v towards center of sphere
 	double[] v_c = new double[3];
+	//point on the surface of sphere
 	double[] P = new double[3];
+	//normal on the surface of P
 	double[] N = new double[3];
+	//front-most roots for raytracing
 	double[] T = new double[2];
+	//front-most  sphere for raytracing
 	double[] T_s;
+	//temporary roots for raytracing
 	double[] root = new double[2];
+	//color for raytracing
 	double[] rgb = new double[3];
 
 	Material material;
@@ -25,17 +41,9 @@ public class MyMISApplet extends MISApplet
 		{{-1,-1,-1}, {.1, .1, 1}}
 	};
 	
-	int x;
-	int y;
-
-	double[] pix_z;
-	int[] pix2;
-
 	public void initialize()
 	{
 		material = new Material();
-		pix_z = new double[W * H];
-		pix2 = new int[W * H];
 		for(double[][] light: lights)
 			normalize(light[0]);
 	}
@@ -47,7 +55,6 @@ public class MyMISApplet extends MISApplet
 		for(int y = 0; y < H; y++)
 			for(int x = 0; x < W; x++)
 			{
-				pix2[y * W + x] = pix[y * W + x];
 				pix[y * W + x] = pack(255, 255, 255);
 			}
 				
@@ -56,6 +63,9 @@ public class MyMISApplet extends MISApplet
 		material.setSpecular(1, 1, 1, 20);
 	}
 
+	/*
+		dot-multiply between vectors
+	*/
 	public double dot(double[] a, double[] b)
 	{
 		double c = 0;
@@ -65,6 +75,9 @@ public class MyMISApplet extends MISApplet
 		return c;
 	}
 
+	/*
+		set a three dimensional vector
+	*/
 	public void set(double[] dst, double a, double b, double c)
 	{
 		dst[0] = a;
@@ -72,6 +85,9 @@ public class MyMISApplet extends MISApplet
 		dst[2] = c;
 	}
 
+	/*
+		normalize a vector with arbitrary dimensional vector
+	*/
 	public void normalize(double[] vector)
 	{
 		double sqrSum = 0;
@@ -82,6 +98,9 @@ public class MyMISApplet extends MISApplet
 			vector[i] /= sqrtSum;
 	}
 
+	/*
+		test if a quadratic equation Ax^2 + Bx + C = 0 has a real solution. If yes, return true and save the roots in root, else return false.
+	*/
 	public boolean solveQuadraticEquation(double A, double B, double C, double[] root)
 	{
 		double discriminant = B * B - 4 * A * C;
@@ -93,6 +112,13 @@ public class MyMISApplet extends MISApplet
 		return true;
 	}
 
+	/*
+		@param v current position
+		@param w normalized direction
+		@param T save the front-most roots
+
+		test if a ray hits something. if yes, return true, else return false.
+	*/
 	public boolean raytrace(double[] v, double[] w, double[] T)
 	{
 		boolean solved = false;
@@ -122,6 +148,9 @@ public class MyMISApplet extends MISApplet
 		return solved;
 	}
 
+	/*
+		compute the rgb value for every pixel if a ray hits something.
+	*/
 	public void computeShading(double[] N, double[] rgb)
 	{
 		double[] A = material.getAmbient();
@@ -136,9 +165,13 @@ public class MyMISApplet extends MISApplet
 
 		for(double[][] light: lights)
 		{
-			set(w, light[0][0], light[0][1], light[0][1]);
+			set(w, light[0][0], light[0][1], light[0][2]);
+
+			//if this point is hidden by other objects, a shadow is applied
 			if(raytrace(v, w, T))
 				continue;
+
+			//phong reflection model
 			double ldirN = 0;
 			for(int k = 0; k < 3; k++)
 				ldirN += light[0][k] * N[k];
@@ -155,6 +188,10 @@ public class MyMISApplet extends MISApplet
 			rgb[k] = 255 * Math.pow(rgb[k], 0.45);
 	}
 
+	/*
+		main part.
+		move the spheres, traverse every pixel, and set color for every pixel
+	*/
 	public void computeImage(double time)
 	{
 		initFrame(time);
@@ -168,9 +205,9 @@ public class MyMISApplet extends MISApplet
 		sphere[2][0] = Math.sin(time + 4); 
 		sphere[2][1] = Math.cos(time + 4);
 		sphere[2][2] = -8;
-		for(y = 0; y < H; y++)
+		for(int y = 0; y < H; y++)
 		{
-			for(x = 0; x < W; x++)
+			for(int x = 0; x < W; x++)
 			{
 				set(v, 0, 0, FOV);
 				double j = (H / 2 - y) * 1.0 / 50;
@@ -178,14 +215,16 @@ public class MyMISApplet extends MISApplet
 				set(w, i, j, -10);
 				normalize(w);
 
+				//if the ray hits something
 				if(raytrace(v, w, T))
 				{
 					for(int k = 0; k < 3; k++)
 					{
+						//point position
 						P[k] = v[k] + T[0] * w[k];
+						//normal
 						N[k] = P[k] - T_s[k];
 					}
-					pix_z[y * W + x] = T[0];
 					normalize(N);
 					set(v, P[0], P[1], P[2]);
 					computeShading(N, rgb);

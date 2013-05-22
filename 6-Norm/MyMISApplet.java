@@ -288,7 +288,7 @@ public class MyMISApplet extends MISApplet {
 		faces = cube.getFaces();
 
 		//draw the cube
-		drawFace(cube);
+		//drawFace(cube);
 
 		torus.torus();
 		torus.getMatrix().identity().translate(0, -2, 0).rotateX(.5).rotateY(time).scale(.5, .5, .5);

@@ -1,9 +1,9 @@
 /*
-	Assignment 8
+	Assignment 9
 	John Mu
 	jm4911
 	
-	easy to understand
+	same with former version
 */
 class Material
 {
